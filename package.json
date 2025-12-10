@@ -2,7 +2,6 @@
   "name": "styledecor",
   "version": "0.1.0",
   "private": true,
- 
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
     "@reduxjs/toolkit": "^2.6.1",
@@ -61,7 +60,7 @@
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/line-clamp": "^0.1.0",
-    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/typography": "^0.5.19",
     "@vitejs/plugin-react": "4.3.4",
     "autoprefixer": "10.4.2",
     "postcss": "8.4.8",
