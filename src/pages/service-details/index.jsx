@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { serviceService } from '../../services/serviceService';
+import { serviceAPI as serviceService } from '../../services/api/serviceAPI';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import PrimaryNav from '../../components/navigation/PrimaryNav';
 import Breadcrumb from '../../components/navigation/Breadcrumb';

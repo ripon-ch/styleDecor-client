@@ -12,7 +12,7 @@ import SortControls from './components/SortControls';
 import EmptyState from './components/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
-import { serviceService } from '../../services/serviceService';
+import { serviceAPI as serviceService } from '../../services/api/serviceAPI';
 
 export default function ServicesCatalog() {
   const [services, setServices] = useState([]);

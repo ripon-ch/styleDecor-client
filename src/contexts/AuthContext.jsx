@@ -1,108 +1,140 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+// Location: client/src/contexts/AuthContext.jsx
+// MongoDB Backend + JWT Authentication (FIXED)
 
-const AuthContext = createContext({});
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
+import { authAPI } from "../services/api/authAPI";
 
+// ================= CONTEXT =================
+export const AuthContext = createContext(null);
+
+// ================= HOOK (FIX) =================
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used inside AuthProvider");
   }
   return context;
 };
 
+// ================= PROVIDER =================
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Check auth on app load
   useEffect(() => {
-    // Get initial session
-    supabase?.auth?.getSession()?.then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProfile(session?.user?.id);
-      }
-      setLoading(false);
-    });
-
-    // Listen for auth changes (MUST be synchronous)
-    const {
-      data: { subscription },
-    } = supabase?.auth?.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProfile(session?.user?.id);
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription?.unsubscribe();
+    checkAuth();
   }, []);
 
-  const loadUserProfile = async (userId) => {
+  // ================= CHECK AUTH =================
+  const checkAuth = async () => {
     try {
-      const { data, error } = await supabase?.from('user_profiles')?.select('*')?.eq('id', userId)?.single();
+      const token = localStorage.getItem("authToken");
 
-      if (error) throw error;
-      setProfile(data);
-    } catch (error) {
-      console.error('Error loading profile:', error?.message);
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const userData = await authAPI.getProfile();
+      setUser(userData);
+    } catch (err) {
+      console.error("Auth check failed:", err);
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("refreshToken");
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const signIn = async (email, password) => {
-    const { data, error } = await supabase?.auth?.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
-    return data;
+  // ================= LOGIN =================
+  const login = async (email, password) => {
+    try {
+      setError(null);
+      const { user } = await authAPI.signIn(email, password);
+      setUser(user);
+      return { success: true, user };
+    } catch (err) {
+      const message = err.message || "Login failed";
+      setError(message);
+      throw new Error(message);
+    }
   };
 
-  const signUp = async (email, password, fullName, phone, address, role = 'customer') => {
-    const { data, error } = await supabase?.auth?.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone: phone || '',
-          address: address || '',
-          role: role,
-        },
-      },
-    });
-    if (error) throw error;
-    return data;
+  // ================= REGISTER =================
+  const register = async (userData) => {
+    try {
+      setError(null);
+      const { user } = await authAPI.signUp(
+        userData.email,
+        userData.password,
+        userData.fullName,
+        userData.phone,
+        userData.address,
+        userData.role
+      );
+      setUser(user);
+      return { success: true, user };
+    } catch (err) {
+      const message = err.message || "Registration failed";
+      setError(message);
+      throw new Error(message);
+    }
   };
 
-  const signOut = async () => {
-    const { error } = await supabase?.auth?.signOut();
-    if (error) throw error;
+  // ================= LOGOUT =================
+  const logout = async () => {
+    try {
+      await authAPI.signOut();
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("refreshToken");
+      setUser(null);
+    }
   };
 
+  // ================= UPDATE PROFILE =================
   const updateProfile = async (updates) => {
-    if (!user) throw new Error('No user logged in');
-
-    const { data, error } = await supabase?.from('user_profiles')?.update(updates)?.eq('id', user?.id)?.select()?.single();
-
-    if (error) throw error;
-    setProfile(data);
-    return data;
+    try {
+      setError(null);
+      const updatedUser = await authAPI.updateProfile(updates);
+      setUser(updatedUser);
+      return { success: true, user: updatedUser };
+    } catch (err) {
+      const message = err.message || "Update failed";
+      setError(message);
+      throw new Error(message);
+    }
   };
 
+  // ================= CONTEXT VALUE =================
   const value = {
     user,
-    profile,
     loading,
-    signIn,
-    signUp,
-    signOut,
+    error,
+    login,
+    register,
+    logout,
     updateProfile,
+    checkAuth,
+    isAuthenticated: Boolean(user),
+    isAdmin: user?.role === "admin",
+    isDecorator: user?.role === "decorator",
+    isCustomer: user?.role === "customer",
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

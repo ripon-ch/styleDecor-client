@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { bookingService } from '../../services/bookingService';
+import { bookingAPI as bookingService } from '../../services/api/bookingAPI';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import PrimaryNav from '../../components/navigation/PrimaryNav';
 import Breadcrumb from '../../components/navigation/Breadcrumb';
