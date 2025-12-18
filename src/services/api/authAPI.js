@@ -1,104 +1,43 @@
-import axiosInstance from './axiosConfig';
-import { API_ENDPOINTS } from './config';
+import axios from "./axiosConfig";
 
 export const authAPI = {
-  async signIn(email, password) {
-    try {
-      const response = await axiosInstance?.post(API_ENDPOINTS?.AUTH?.LOGIN, {
-        email,
-        password,
-      });
+  // LOGIN
+  login: async (email, password) => {
+    const res = await axios.post("/auth/login", {
+      email,
+      password,
+    });
 
-      const { token, refreshToken, user } = response?.data;
-      
-      // Store tokens
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('refreshToken', refreshToken);
+    const token = res.data?.token || res.data?.data?.token;
+    const user = res.data?.user || res.data?.data?.user;
 
-      return { user, session: { access_token: token } };
-    } catch (error) {
-      throw new Error(error?.message || 'Login failed');
+    if (!token || !user) {
+      throw new Error("Invalid login response");
     }
+
+    localStorage.setItem("authToken", token);
+    return { user };
   },
 
-  async signUp(email, password, fullName, phone, address, role = 'customer') {
-    try {
-      const response = await axiosInstance?.post(API_ENDPOINTS?.AUTH?.REGISTER, {
-        email,
-        password,
-        fullName,
-        phone,
-        address,
-        role,
-      });
+  // REGISTER
+  register: async (userData) => {
+    const res = await axios.post("/auth/register", userData);
 
-      const { token, refreshToken, user } = response?.data;
-      
-      // Store tokens
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('refreshToken', refreshToken);
+    const token = res.data?.token || res.data?.data?.token;
+    const user = res.data?.user || res.data?.data?.user;
 
-      return { user, session: { access_token: token } };
-    } catch (error) {
-      throw new Error(error?.message || 'Registration failed');
-    }
+    localStorage.setItem("authToken", token);
+    return { user };
   },
 
-  async signOut() {
-    try {
-      await axiosInstance?.post(API_ENDPOINTS?.AUTH?.LOGOUT);
-      
-      // Clear tokens
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
-    } catch (error) {
-      // Even if logout fails, clear local tokens
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('refreshToken');
-      throw new Error(error?.message || 'Logout failed');
-    }
+  // PROFILE
+  getProfile: async () => {
+    const res = await axios.get("/auth/profile");
+    return res.data?.data || res.data;
   },
 
-  async getProfile() {
-    try {
-      const response = await axiosInstance?.get(API_ENDPOINTS?.AUTH?.GET_PROFILE);
-      return response?.data?.user;
-    } catch (error) {
-      throw new Error(error?.message || 'Failed to fetch profile');
-    }
-  },
-
-  async forgotPassword(email) {
-    try {
-      const response = await axiosInstance?.post(API_ENDPOINTS?.AUTH?.FORGOT_PASSWORD, {
-        email,
-      });
-      return response?.data;
-    } catch (error) {
-      throw new Error(error?.message || 'Failed to send reset email');
-    }
-  },
-
-  async resetPassword(token, newPassword) {
-    try {
-      const response = await axiosInstance?.post(API_ENDPOINTS?.AUTH?.RESET_PASSWORD, {
-        token,
-        password: newPassword,
-      });
-      return response?.data;
-    } catch (error) {
-      throw new Error(error?.message || 'Failed to reset password');
-    }
-  },
-
-  async verifyEmail(token) {
-    try {
-      const response = await axiosInstance?.post(API_ENDPOINTS?.AUTH?.VERIFY_EMAIL, {
-        token,
-      });
-      return response?.data;
-    } catch (error) {
-      throw new Error(error?.message || 'Email verification failed');
-    }
+  logout: async () => {
+    await axios.post("/auth/logout");
+    localStorage.removeItem("authToken");
   },
 };

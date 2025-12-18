@@ -1,5 +1,4 @@
-// Location: client/src/contexts/AuthContext.jsx
-// MongoDB Backend + JWT Authentication (FIXED)
+// MongoDB Backend + JWT Authentication (FINAL FIX)
 
 import {
   createContext,
@@ -12,7 +11,7 @@ import { authAPI } from "../services/api/authAPI";
 // ================= CONTEXT =================
 export const AuthContext = createContext(null);
 
-// ================= HOOK (FIX) =================
+// ================= HOOK =================
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -27,16 +26,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check auth on app load
+  // ================= CHECK AUTH ON LOAD =================
   useEffect(() => {
     checkAuth();
   }, []);
 
-  // ================= CHECK AUTH =================
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem("authToken");
-
       if (!token) {
         setLoading(false);
         return;
@@ -58,11 +55,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setError(null);
-      const { user } = await authAPI.signIn(email, password);
+
+      // 🔴 IMPORTANT: backend route = /login
+      const { user } = await authAPI.login(email, password);
+
       setUser(user);
       return { success: true, user };
     } catch (err) {
-      const message = err.message || "Login failed";
+      const message =
+        err?.response?.data?.message || err.message || "Login failed";
       setError(message);
       throw new Error(message);
     }
@@ -72,18 +73,15 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setError(null);
-      const { user } = await authAPI.signUp(
-        userData.email,
-        userData.password,
-        userData.fullName,
-        userData.phone,
-        userData.address,
-        userData.role
-      );
+
+      // 🔴 IMPORTANT: backend route = /register
+      const { user } = await authAPI.register(userData);
+
       setUser(user);
       return { success: true, user };
     } catch (err) {
-      const message = err.message || "Registration failed";
+      const message =
+        err?.response?.data?.message || err.message || "Registration failed";
       setError(message);
       throw new Error(message);
     }
@@ -92,7 +90,7 @@ export const AuthProvider = ({ children }) => {
   // ================= LOGOUT =================
   const logout = async () => {
     try {
-      await authAPI.signOut();
+      await authAPI.logout();
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
@@ -110,7 +108,8 @@ export const AuthProvider = ({ children }) => {
       setUser(updatedUser);
       return { success: true, user: updatedUser };
     } catch (err) {
-      const message = err.message || "Update failed";
+      const message =
+        err?.response?.data?.message || err.message || "Update failed";
       setError(message);
       throw new Error(message);
     }
@@ -126,7 +125,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     checkAuth,
-    isAuthenticated: Boolean(user),
+    isAuthenticated: !!user,
     isAdmin: user?.role === "admin",
     isDecorator: user?.role === "decorator",
     isCustomer: user?.role === "customer",

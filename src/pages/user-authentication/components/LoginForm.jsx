@@ -1,3 +1,8 @@
+// ==========================================
+// FILE 1: src/pages/user-authentication/components/LoginForm.jsx
+// REPLACE ENTIRE FILE
+// ==========================================
+
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -7,19 +12,30 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  
+  const { login } = useAuth(); // Changed from signIn to login
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e?.preventDefault();
+    e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      navigate('/');
+      const result = await login(email, password);
+      const user = result.user;
+      
+      // Redirect based on role
+      if (user.role === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (user.role === 'decorator') {
+        navigate('/decorator-dashboard');
+      } else {
+        navigate('/customer-dashboard');
+      }
     } catch (err) {
-      setError(err?.message);
+      setError(err.message || 'Login failed. Please check your credentials.');
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -33,7 +49,7 @@ export default function LoginForm() {
             {error}
           </div>
         )}
-
+        
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
@@ -42,7 +58,7 @@ export default function LoginForm() {
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e?.target?.value)}
+            onChange={(e) => setEmail(e.target.value)}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your email"
@@ -57,7 +73,7 @@ export default function LoginForm() {
             id="password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e?.target?.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your password"
@@ -72,6 +88,7 @@ export default function LoginForm() {
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
+
       {/* Demo Credentials */}
       <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">Demo Credentials</h3>
@@ -80,7 +97,7 @@ export default function LoginForm() {
             <strong>Customer:</strong> customer@styledecor.com / customer123
           </div>
           <div>
-            <strong>Decorator:</strong> decorator@styledecor.com / decorator123
+            <strong>Decorator:</strong> decorator1@styledecor.com / decorator123
           </div>
           <div>
             <strong>Admin:</strong> admin@styledecor.com / admin123
@@ -90,3 +107,4 @@ export default function LoginForm() {
     </div>
   );
 }
+
