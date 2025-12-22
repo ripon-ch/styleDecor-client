@@ -1,6 +1,6 @@
 import React from 'react';
-import Button from '../../../components/ui/Button';
-import Icon from '../../../components/AppIcon';
+import Button from '../../../components/ui/Button.jsx';
+import Icon from '../../../components/AppIcon.jsx';
 
 const SocialAuth = () => {
   const socialProviders = [

@@ -1,6 +1,6 @@
 import React from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
+import Icon from '../../../components/AppIcon.jsx';
+import Image from '../../../components/AppImage.jsx';
 
 const ServiceInfo = ({ service }) => {
   return (

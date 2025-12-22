@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import Icon from '../../../components/AppIcon';
+import Icon from '../../../components/AppIcon.jsx';
 
 const ValuesCommitment = () => {
   const ref = useRef(null);

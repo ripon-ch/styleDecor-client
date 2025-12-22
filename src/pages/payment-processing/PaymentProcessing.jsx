@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
-import PrimaryNav from '../../components/navigation/PrimaryNav';
-import Breadcrumb from '../../components/navigation/Breadcrumb';
-import BookingSummaryCard from './components/BookingSummaryCard';
-import PricingBreakdown from './components/PricingBreakdown';
-import StripePaymentForm from './components/StripePaymentForm';
-import SecurityIndicators from './components/SecurityIndicators';
-import PolicyInformation from './components/PolicyInformation';
-import PaymentSuccessModal from './components/PaymentSuccessModal';
+import PrimaryNav from '@/components/navigation/PrimaryNav.jsx';
+import Breadcrumb from '@/components/navigation/Breadcrumb.jsx';
+import BookingSummaryCard from './components/BookingSummaryCard.jsx';
+import PricingBreakdown from './components/PricingBreakdown.jsx';
+import StripePaymentForm from './components/StripePaymentForm.jsx';
+import SecurityIndicators from './components/SecurityIndicators.jsx';
+import PolicyInformation from './components/PolicyInformation.jsx';
+import PaymentSuccessModal from './components/PaymentSuccessModal.jsx';
 
 const PaymentProcessing = () => {
   const [isProcessing, setIsProcessing] = useState(false);

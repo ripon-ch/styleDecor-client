@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
-import Input from '../../../components/ui/Input';
-import Select from '../../../components/ui/Select';
-import Button from '../../../components/ui/Button';
+import Icon from '../../../components/AppIcon.jsx';
+import Input from '../../../components/ui/Input.jsx';
+import Select from '../../../components/ui/Select.jsx';
+import Button from '../../../components/ui/Button.jsx';
 import { useNavigate } from 'react-router-dom';
-import showAlert from '../../../utils/alert';
+import showAlert from '../../../utils/alert.js';
 
 const StripePaymentForm = ({ amount, onSuccess }) => {
   const navigate = useNavigate();

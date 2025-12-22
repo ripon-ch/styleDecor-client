@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
+import Icon from '../../../components/AppIcon.jsx';
+import Button from '../../../components/ui/Button.jsx';
+import Input from '../../../components/ui/Input.jsx';
 import Swal from 'sweetalert2';
 
 const SupportTicket = () => {

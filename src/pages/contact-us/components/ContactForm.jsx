@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useForm } from "react-hook-form";
-import Icon from "../../../components/AppIcon";
-import Input from "../../../components/ui/Input";
-import Button from "../../../components/ui/Button";
-import Select from "../../../components/ui/Select";
+import Icon from "../../../components/AppIcon.jsx";
+import Input from "../../../components/ui/Input.jsx";
+import Button from "../../../components/ui/Button.jsx";
+import Select from "../../../components/ui/Select.jsx";
 import Swal from "sweetalert2";
 
 const ContactForm = () => {

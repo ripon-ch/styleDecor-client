@@ -1,139 +1,105 @@
-// MongoDB Backend + JWT Authentication (FINAL FIX)
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-} from "react";
-import { authAPI } from "../services/api/authAPI";
-
-// ================= CONTEXT =================
 export const AuthContext = createContext(null);
 
-// ================= HOOK =================
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-  return context;
-};
+// ✅ MOCK USERS (NO SUPABASE)
+const mockUsers = [
+  {
+    id: "1",
+    email: "customer@styledecor.com",
+    password: "customer123",
+    role: "customer",
+    name: "Customer User",
+  },
+  {
+    id: "2",
+    email: "decorator1@styledecor.com",
+    password: "decorator123",
+    role: "decorator",
+    name: "Decorator User",
+  },
+  {
+    id: "3",
+    email: "admin@styledecor.com",
+    password: "admin123",
+    role: "admin",
+    name: "Admin User",
+  },
+];
 
-// ================= PROVIDER =================
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // ================= CHECK AUTH ON LOAD =================
+  // ✅ Restore auth safely
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+      const isAuthenticated = localStorage.getItem("isAuthenticated");
+      const role = localStorage.getItem("userRole");
 
-      const userData = await authAPI.getProfile();
-      setUser(userData);
+      if (isAuthenticated === "true" && role) {
+        const foundUser = mockUsers.find(
+          (u) => u.role === role
+        );
+        if (foundUser) {
+          setUser(foundUser);
+        }
+      }
     } catch (err) {
-      console.error("Auth check failed:", err);
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("refreshToken");
-      setUser(null);
+      console.error("Auth restore failed:", err);
+      localStorage.clear();
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // ✅ Sign in
+  const signIn = async (email, password) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const foundUser = mockUsers.find(
+          (u) => u.email === email && u.password === password
+        );
+
+        if (!foundUser) {
+          reject(new Error("Invalid email or password"));
+          return;
+        }
+
+        setUser(foundUser);
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("userRole", foundUser.role);
+
+        resolve({ user: foundUser });
+      }, 400);
+    });
   };
 
-  // ================= LOGIN =================
-  const login = async (email, password) => {
-    try {
-      setError(null);
-
-      // 🔴 IMPORTANT: backend route = /login
-      const { user } = await authAPI.login(email, password);
-
-      setUser(user);
-      return { success: true, user };
-    } catch (err) {
-      const message =
-        err?.response?.data?.message || err.message || "Login failed";
-      setError(message);
-      throw new Error(message);
-    }
-  };
-
-  // ================= REGISTER =================
-  const register = async (userData) => {
-    try {
-      setError(null);
-
-      // 🔴 IMPORTANT: backend route = /register
-      const { user } = await authAPI.register(userData);
-
-      setUser(user);
-      return { success: true, user };
-    } catch (err) {
-      const message =
-        err?.response?.data?.message || err.message || "Registration failed";
-      setError(message);
-      throw new Error(message);
-    }
-  };
-
-  // ================= LOGOUT =================
-  const logout = async () => {
-    try {
-      await authAPI.logout();
-    } catch (err) {
-      console.error("Logout error:", err);
-    } finally {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("refreshToken");
-      setUser(null);
-    }
-  };
-
-  // ================= UPDATE PROFILE =================
-  const updateProfile = async (updates) => {
-    try {
-      setError(null);
-      const updatedUser = await authAPI.updateProfile(updates);
-      setUser(updatedUser);
-      return { success: true, user: updatedUser };
-    } catch (err) {
-      const message =
-        err?.response?.data?.message || err.message || "Update failed";
-      setError(message);
-      throw new Error(message);
-    }
-  };
-
-  // ================= CONTEXT VALUE =================
-  const value = {
-    user,
-    loading,
-    error,
-    login,
-    register,
-    logout,
-    updateProfile,
-    checkAuth,
-    isAuthenticated: !!user,
-    isAdmin: user?.role === "admin",
-    isDecorator: user?.role === "decorator",
-    isCustomer: user?.role === "customer",
+  // ✅ Sign out
+  const signOut = () => {
+    setUser(null);
+    localStorage.clear();
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signIn,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
+};
+
+// ✅ SAFE HOOK (PREVENTS NULL CONTEXT CRASH)
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return ctx;
 };

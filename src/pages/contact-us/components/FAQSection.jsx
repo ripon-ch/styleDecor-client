@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import Icon from '../../../components/AppIcon';
+import Icon from '../../../components/AppIcon.jsx';
 
 const FAQSection = () => {
   const ref = useRef(null);

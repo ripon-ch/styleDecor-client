@@ -1,6 +1,6 @@
 import React from 'react';
-import Image from '../../../components/AppImage';
-import Icon from '../../../components/AppIcon';
+import Image from '../../../components/AppImage.jsx';
+import Icon from '../../../components/AppIcon.jsx';
 
 const BookingSummaryCard = ({ bookingData }) => {
   return (

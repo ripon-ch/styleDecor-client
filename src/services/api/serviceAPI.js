@@ -1,5 +1,5 @@
-import axiosInstance from './axiosConfig';
-import { API_ENDPOINTS } from './config';
+import axiosInstance from './axiosConfig.js';
+import { API_ENDPOINTS } from './config.js';
 
 export const serviceAPI = {
   async getAll(filters = {}) {

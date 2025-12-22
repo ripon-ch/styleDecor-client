@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Icon from "../../../components/AppIcon";
-import Button from "../../../components/ui/Button";
-import Input from "../../../components/ui/Input";
-import Select from "../../../components/ui/Select";
-import { Checkbox } from "../../../components/ui/Checkbox";
-import showAlert from "../../../utils/alert";
+import Icon from "../../../components/AppIcon.jsx";
+import Button from "../../../components/ui/Button.jsx";
+import Input from "../../../components/ui/Input.jsx";
+import Select from "../../../components/ui/Select.jsx";
+import { Checkbox } from "../../../components/ui/Checkbox.jsx";
+import showAlert from "../../../utils/alert.js";
 
 const BookingForm = ({ service }) => {
     const navigate = useNavigate();

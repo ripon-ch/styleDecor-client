@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Icon from '../../components/AppIcon';
-import PrimaryNav from '../../components/navigation/PrimaryNav';
-import Footer from '../home-landing/components/Footer';
+import Icon from '@/components/AppIcon.jsx';
+import PrimaryNav from '@/components/navigation/PrimaryNav.jsx';
+import Footer from '../home-landing/components/Footer.jsx';
 import { 
   LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 

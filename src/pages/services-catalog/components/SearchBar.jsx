@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Icon from '../../../components/AppIcon';
-import Input from '../../../components/ui/Input';
+import Icon from '../../../components/AppIcon.jsx';
+import Input from '../../../components/ui/Input.jsx';
 
 const SearchBar = ({ onSearch, searchQuery }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import Icon from '../../../components/AppIcon';
-import AppImage from '../../../components/AppImage';
+import Icon from '../../../components/AppIcon.jsx';
+import AppImage from '../../../components/AppImage.jsx';
 
 const PortfolioManagement = ({ portfolioItems }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');

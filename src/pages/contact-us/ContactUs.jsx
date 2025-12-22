@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-import PrimaryNav from '../../components/navigation/PrimaryNav';
-import Footer from '../home-landing/components/Footer';
-import ContactHero from './components/ContactHero';
-import ContactForm from './components/ContactForm';
-import ContactMethods from './components/ContactMethods';
-import OfficeLocations from './components/OfficeLocations';
-import FAQSection from './components/FAQSection';
-import SupportTicket from './components/SupportTicket';
+import PrimaryNav from '@/components/navigation/PrimaryNav.jsx';
+import Footer from '../home-landing/components/Footer.jsx';
+import ContactHero from './components/ContactHero.jsx';
+import ContactForm from './components/ContactForm.jsx';
+import ContactMethods from './components/ContactMethods.jsx';
+import OfficeLocations from './components/OfficeLocations.jsx';
+import FAQSection from './components/FAQSection.jsx';
+import SupportTicket from './components/SupportTicket.jsx';
 
 const ContactUs = () => {
   const [isLoading, setIsLoading] = useState(true);

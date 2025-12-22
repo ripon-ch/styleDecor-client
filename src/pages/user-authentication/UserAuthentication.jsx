@@ -1,60 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PrimaryNav from '../../components/navigation/PrimaryNav';
-import Breadcrumb from '../../components/navigation/Breadcrumb';
-import Icon from '../../components/AppIcon';
-import AuthTabs from './components/AuthTabs';
-import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm';
-import SocialAuth from './components/SocialAuth';
-import TrustSignals from './components/TrustSignals';
-import Footer from '../home-landing/components/Footer';
-import showAlert from '../../utils/alert';
+import { useAuth } from "../../hooks/useAuth.jsx";
+
+import PrimaryNav from '@/components/navigation/PrimaryNav.jsx';
+import Breadcrumb from '@/components/navigation/Breadcrumb.jsx';
+import Icon from '@/components/AppIcon.jsx';
+import AuthTabs from './components/AuthTabs.jsx';
+import LoginForm from './components/LoginForm.jsx';
+import RegisterForm from './components/RegisterForm.jsx';
+import SocialAuth from './components/SocialAuth.jsx';
+import TrustSignals from './components/TrustSignals.jsx';
+import Footer from '../home-landing/components/Footer.jsx';
+import showAlert from '../../utils/alert.js';
 
 const UserAuthentication = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth(); // Destructure signIn if you need it directly, though LoginForm handles it usually
   const [isLogin, setIsLogin] = useState(true);
 
-  // Fix: Handle tab changes correctly - convert string ID to boolean
   const handleTabChange = (tabId) => {
     setIsLogin(tabId === 'login');
   };
 
-  const handleAuthSuccess = (userData, isLoginMode) => {
-    // Show success alert
+  // ✅ FIX: Async function that doesn't rely on .then()
+  const handleAuthSuccess = async (userData, isLoginMode) => {
     if (isLoginMode) {
-      showAlert?.success(
-        'Login Successful!',
-        `Welcome back, ${userData?.name || 'User'}!`
-      )?.then(() => {
-        // Navigate based on user role
-        if (userData?.role === 'customer') {
-          navigate('/customer-dashboard');
-        } else if (userData?.role === 'decorator') {
-          navigate('/decorator-dashboard');
-        } else if (userData?.role === 'admin') {
-          navigate('/admin-dashboard');
+      // 1. Show Alert (await if possible, but safely)
+      try {
+        if (showAlert?.success) {
+          await showAlert.success(
+            'Login Successful!',
+            `Welcome back, ${userData?.name || 'User'}!`
+          );
         }
-      });
+      } catch (e) {
+        console.log("Alert skipped or failed, proceeding to redirect");
+      }
+      
+      // 2. FORCE Redirect immediately after
+      console.log("Redirecting user with role:", userData?.role);
+      
+      switch(userData?.role) {
+        case 'customer':
+          navigate('/customer-dashboard');
+          break;
+        case 'decorator':
+          navigate('/decorator-dashboard');
+          break;
+        case 'admin':
+          navigate('/admin-dashboard');
+          break;
+        default:
+          navigate('/customer-dashboard'); // Fallback
+      }
+
     } else {
-      showAlert?.success(
-        'Registration Successful!',
-        'Your account has been created successfully!'
-      )?.then(() => {
-        navigate('/customer-dashboard');
-      });
+      // Registration Logic
+      if (showAlert?.success) {
+        await showAlert.success(
+          'Registration Successful!',
+          'Your account has been created successfully!'
+        );
+      }
+      navigate('/customer-dashboard');
     }
   };
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (isAuthenticated === 'true') {
-      const userRole = localStorage.getItem('userRole');
-      if (userRole === 'customer' || userRole === 'decorator' || userRole === 'admin') {
-        navigate('/customer-dashboard');
-      }
-    }
-  }, [navigate]);
+ 
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,6 +76,7 @@ const UserAuthentication = () => {
           <Breadcrumb />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mt-8">
+            {/* Left Side (Info) - Order 2 on mobile, Order 1 on Desktop */}
             <div className="order-2 lg:order-1">
               <div className="sticky top-24">
                 <div className="mb-8">
@@ -86,7 +99,7 @@ const UserAuthentication = () => {
                     <div>
                       <h4 className="font-semibold text-foreground mb-2">Need Help?</h4>
                       <p className="text-sm text-muted-foreground mb-3">
-                        Our customer support team is available 24/7 to assist you with any questions about registration or booking services.
+                        Our customer support team is available 24/7 to assist you.
                       </p>
                       <div className="flex flex-col gap-2 text-sm">
                         <div className="flex items-center gap-2 text-foreground">
@@ -104,6 +117,7 @@ const UserAuthentication = () => {
               </div>
             </div>
 
+            {/* Right Side (Forms) - Order 1 on mobile, Order 2 on Desktop */}
             <div className="order-1 lg:order-2">
               <div className="bg-card border border-border rounded-lg shadow-base p-6 sm:p-8">
                 <AuthTabs activeTab={isLogin ? 'login' : 'register'} onTabChange={handleTabChange} />
@@ -112,16 +126,12 @@ const UserAuthentication = () => {
                   {isLogin ? (
                     <>
                       <h2 className="text-xl font-semibold text-foreground mb-2">Login to Your Account</h2>
-                      <p className="text-sm text-muted-foreground">
-                        Enter your credentials to access your dashboard
-                      </p>
+                      <p className="text-sm text-muted-foreground">Enter your credentials to access your dashboard</p>
                     </>
                   ) : (
                     <>
                       <h2 className="text-xl font-semibold text-foreground mb-2">Create New Account</h2>
-                      <p className="text-sm text-muted-foreground">
-                        Join thousands of satisfied customers across Bangladesh
-                      </p>
+                      <p className="text-sm text-muted-foreground">Join thousands of satisfied customers</p>
                     </>
                   )}
                 </div>
@@ -157,18 +167,6 @@ const UserAuthentication = () => {
                     </button>
                   </p>
                 )}
-              </div>
-
-              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Icon name="Lock" size={18} color="var(--color-success)" />
-                  <div>
-                    <h4 className="text-sm font-semibold text-foreground mb-1">Your Data is Protected</h4>
-                    <p className="text-xs text-muted-foreground">
-                      We use industry-standard encryption and comply with Bangladesh data protection regulations to keep your information secure.
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

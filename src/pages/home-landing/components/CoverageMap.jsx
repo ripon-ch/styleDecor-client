@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
+import Icon from '../../../components/AppIcon.jsx';
 
 const CoverageMap = () => {
   const [selectedDivision, setSelectedDivision] = useState(null);

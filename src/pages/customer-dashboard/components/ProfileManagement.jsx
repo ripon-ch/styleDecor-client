@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-import Input from '../../../components/ui/Input';
-import Select from '../../../components/ui/Select';
-import Button from '../../../components/ui/Button';
-import { Checkbox } from '../../../components/ui/Checkbox';
+import Input from '../../../components/ui/Input.jsx';
+import Select from '../../../components/ui/Select.jsx';
+import Button from '../../../components/ui/Button.jsx';
+import { Checkbox } from '../../../components/ui/Checkbox.jsx';
 
 const ProfileManagement = ({ userProfile }) => {
   const [isEditing, setIsEditing] = useState(false);

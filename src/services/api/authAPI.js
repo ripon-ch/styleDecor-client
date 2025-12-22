@@ -1,43 +1,31 @@
-import axios from "./axiosConfig";
+import axios from "./axiosConfig.js";
 
 export const authAPI = {
-  // LOGIN
-  login: async (email, password) => {
-    const res = await axios.post("/auth/login", {
-      email,
-      password,
+  async login(email, password) {
+    const res = await axios.post("/auth/login", { email, password });
+    return res.data; // { token, user }
+  },
+
+  async register(data) {
+    const res = await axios.post("/auth/register", data);
+    return res.data;
+  },
+
+  async getProfile() {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token");
+
+    const res = await axios.get("/auth/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
-    const token = res.data?.token || res.data?.data?.token;
-    const user = res.data?.user || res.data?.data?.user;
-
-    if (!token || !user) {
-      throw new Error("Invalid login response");
-    }
-
-    localStorage.setItem("authToken", token);
-    return { user };
+    return res.data.user;
   },
 
-  // REGISTER
-  register: async (userData) => {
-    const res = await axios.post("/auth/register", userData);
-
-    const token = res.data?.token || res.data?.data?.token;
-    const user = res.data?.user || res.data?.data?.user;
-
-    localStorage.setItem("authToken", token);
-    return { user };
-  },
-
-  // PROFILE
-  getProfile: async () => {
-    const res = await axios.get("/auth/profile");
-    return res.data?.data || res.data;
-  },
-
-  logout: async () => {
-    await axios.post("/auth/logout");
-    localStorage.removeItem("authToken");
+  async logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   },
 };

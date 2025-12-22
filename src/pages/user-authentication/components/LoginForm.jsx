@@ -1,20 +1,13 @@
-// ==========================================
-// FILE 1: src/pages/user-authentication/components/LoginForm.jsx
-// REPLACE ENTIRE FILE
-// ==========================================
-
 import React, { useState } from 'react';
-import { useAuth } from '../../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth.jsx';
 
-export default function LoginForm() {
+export default function LoginForm({ onSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const { login } = useAuth(); // Changed from signIn to login
-  const navigate = useNavigate();
+
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,20 +15,14 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const result = await login(email, password);
-      const user = result.user;
-      
-      // Redirect based on role
-      if (user.role === 'admin') {
-        navigate('/admin-dashboard');
-      } else if (user.role === 'decorator') {
-        navigate('/decorator-dashboard');
-      } else {
-        navigate('/customer-dashboard');
+      const result = await signIn(email, password);
+
+      // ✅ hand control to parent (UserAuthentication)
+      if (onSuccess) {
+        onSuccess(result?.user, true);
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
-      console.error('Login error:', err);
+      setError(err?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -49,7 +36,7 @@ export default function LoginForm() {
             {error}
           </div>
         )}
-        
+
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
@@ -91,13 +78,15 @@ export default function LoginForm() {
 
       {/* Demo Credentials */}
       <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">Demo Credentials</h3>
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">
+          Demo Credentials
+        </h3>
         <div className="space-y-2 text-sm text-gray-600">
           <div>
             <strong>Customer:</strong> customer@styledecor.com / customer123
           </div>
           <div>
-            <strong>Decorator:</strong> decorator1@styledecor.com / decorator123
+            <strong>Decorator:</strong> decorator@styledecor.com / decorator123
           </div>
           <div>
             <strong>Admin:</strong> admin@styledecor.com / admin123
@@ -107,4 +96,3 @@ export default function LoginForm() {
     </div>
   );
 }
-

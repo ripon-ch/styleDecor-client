@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import PrimaryNav from '../../components/navigation/PrimaryNav';
-import Breadcrumb from '../../components/navigation/Breadcrumb';
-import DashboardHeader from './components/DashboardHeader';
-import PerformanceStats from './components/PerformanceStats';
-import TabNavigation from './components/TabNavigation';
-import ActiveBookingCard from './components/ActiveBookingCard';
-import PortfolioManagement from './components/PortfolioManagement';
-import EarningsAnalytics from './components/EarningsAnalytics';
-import ProfileSettings from './components/ProfileSettings';
-import CustomerReviews from './components/CustomerReviews';
-import QuickActions from './components/QuickActions';
-import Footer from '../home-landing/components/Footer';
+import PrimaryNav from '@/components/navigation/PrimaryNav.jsx';
+import Breadcrumb from '@/components/navigation/Breadcrumb.jsx';
+import DashboardHeader from './components/DashboardHeader.jsx';
+import PerformanceStats from './components/PerformanceStats.jsx';
+import TabNavigation from './components/TabNavigation.jsx';
+import ActiveBookingCard from './components/ActiveBookingCard.jsx';
+import PortfolioManagement from './components/PortfolioManagement.jsx';
+import EarningsAnalytics from './components/EarningsAnalytics.jsx';
+import ProfileSettings from './components/ProfileSettings.jsx';
+import CustomerReviews from './components/CustomerReviews.jsx';
+import QuickActions from './components/QuickActions.jsx';
+import Footer from '../home-landing/components/Footer.jsx';
 
 const DecoratorDashboard = () => {
   const [activeTab, setActiveTab] = useState('bookings');

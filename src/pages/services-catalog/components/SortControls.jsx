@@ -1,5 +1,5 @@
 import React from 'react';
-import Select from '../../../components/ui/Select';
+import Select from '../../../components/ui/Select.jsx';
 
 const SortControls = ({ sortBy, onSortChange }) => {
   const sortOptions = [
