@@ -1,105 +1,118 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut, 
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail // Added for forgot password logic
+} from "firebase/auth";
+import { auth } from "../lib/firebase";
+import axiosInstance from "../services/api/axiosConfig";
 
 export const AuthContext = createContext(null);
-
-// ✅ MOCK USERS (NO SUPABASE)
-const mockUsers = [
-  {
-    id: "1",
-    email: "customer@styledecor.com",
-    password: "customer123",
-    role: "customer",
-    name: "Customer User",
-  },
-  {
-    id: "2",
-    email: "decorator1@styledecor.com",
-    password: "decorator123",
-    role: "decorator",
-    name: "Decorator User",
-  },
-  {
-    id: "3",
-    email: "admin@styledecor.com",
-    password: "admin123",
-    role: "admin",
-    name: "Admin User",
-  },
-];
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Restore auth safely
-  useEffect(() => {
+  const syncWithBackend = async (firebaseUser) => {
     try {
-      const isAuthenticated = localStorage.getItem("isAuthenticated");
-      const role = localStorage.getItem("userRole");
-
-      if (isAuthenticated === "true" && role) {
-        const foundUser = mockUsers.find(
-          (u) => u.role === role
-        );
-        if (foundUser) {
-          setUser(foundUser);
-        }
-      }
+      const token = await firebaseUser.getIdToken();
+      localStorage.setItem("authToken", token);
+      const response = await axiosInstance.get("/auth/me");
+      const userData = response.data.user;
+      localStorage.setItem("userRole", userData.role);
+      setUser(userData);
+      return userData; 
     } catch (err) {
-      console.error("Auth restore failed:", err);
-      localStorage.clear();
-    } finally {
-      setLoading(false);
+      console.error("Backend Sync Failed:", err.message);
+      return null;
     }
-  }, []);
-
-  // ✅ Sign in
-  const signIn = async (email, password) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const foundUser = mockUsers.find(
-          (u) => u.email === email && u.password === password
-        );
-
-        if (!foundUser) {
-          reject(new Error("Invalid email or password"));
-          return;
-        }
-
-        setUser(foundUser);
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userRole", foundUser.role);
-
-        resolve({ user: foundUser });
-      }, 400);
-    });
   };
 
-  // ✅ Sign out
-  const signOut = () => {
-    setUser(null);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
+      if (firebaseUser) {
+        await syncWithBackend(firebaseUser);
+      } else {
+        setUser(null);
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userRole");
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const signIn = async (email, password) => {
+    try {
+      const res = await signInWithEmailAndPassword(auth, email, password);
+      return await syncWithBackend(res.user);
+    } catch (error) {
+      let message = "Invalid email or password.";
+      if (error.code === 'auth/invalid-credential') message = "The email or password you entered is incorrect.";
+      if (error.code === 'auth/too-many-requests') message = "Account temporarily locked. Try again later.";
+      throw new Error(message);
+    }
+  };
+
+  const signUp = async (email, password, fullName, phone, address, role) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const response = await axiosInstance.post("/auth/register", {
+      uid: userCredential.user.uid,
+      email,
+      fullName,
+      phone,
+      address,
+      role
+    });
+    await syncWithBackend(userCredential.user);
+    return response.data;
+  };
+
+  // Added Forgot Password Function
+  const forgotPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      let message = "Failed to send reset email.";
+      if (error.code === 'auth/user-not-found') message = "No account found with this email.";
+      throw new Error(message);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    const res = await signInWithPopup(auth, new GoogleAuthProvider());
+    return await syncWithBackend(res.user);
+  };
+
+  const signInWithFacebook = async () => {
+    const res = await signInWithPopup(auth, new FacebookAuthProvider());
+    return await syncWithBackend(res.user);
+  };
+
+  const signOut = async () => {
+    await firebaseSignOut(auth);
     localStorage.clear();
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        signIn,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={{ 
+      user, loading, signIn, signUp, signOut, 
+      signInWithGoogle, signInWithFacebook, forgotPassword 
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// ✅ SAFE HOOK (PREVENTS NULL CONTEXT CRASH)
 export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return ctx;
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+  return context;
 };
